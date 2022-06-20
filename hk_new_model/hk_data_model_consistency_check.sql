@@ -16,26 +16,6 @@ SELECT pg_cancel_backend(4004);
 SELECT pg_terminate_backend(4004);
 
 
---- to do (database too slow) --> all done!
-alter table map_hk.midland_sale_txn__map drop constraint midland_sale_txn__map_fk_activity_dwid;
-
-drop table masterdata_hk.sale_transaction cascade;
-
-
-ALTER TABLE masterdata_hk.sale_transaction_new RENAME TO sale_transaction;
-
-
-DROP TABLE masterdata_hk.property_v1;
-
-
-DELETE FROM masterdata_hk.project WHERE id = 3059512;
-DELETE FROM masterdata_hk.address WHERE id = 645735838;
-
-
-DELETE FROM masterdata_hk.address WHERE id >= 645735794 and id <= 645735814;
-
-
-
 --- consistency check scripts
 
 -- percentage of activity that we have mapped
@@ -65,13 +45,13 @@ with m as (
     select  
         building_dwid
     from 
-        masterdata_hk.sale_transaction_new st 
+        masterdata_hk.sale_transaction st 
     where 
         building_dwid notnull 
     group by building_dwid 
     having max(address_dwid) <> min(address_dwid)
 )
-select count(*) from masterdata_hk.sale_transaction_new st2 
+select count(*) from masterdata_hk.sale_transaction st2 
 join m on st2.building_dwid = m.building_dwid;
 -- 0
 
@@ -81,17 +61,15 @@ with m as (
     select  
         building_dwid
     from 
-        masterdata_hk.sale_transaction_new st 
+        masterdata_hk.sale_transaction st 
     where 
         building_dwid notnull 
     group by building_dwid 
     having max(project_dwid) <> min(project_dwid)
 )
-select count(*) from masterdata_hk.sale_transaction_new st2 
+select count(*) from masterdata_hk.sale_transaction st2 
 join m on st2.building_dwid = m.building_dwid;
-
-
-
+-- 0
 
 
 
@@ -100,46 +78,47 @@ join m on st2.building_dwid = m.building_dwid;
   
   select 
     count(*)
-  from masterdata_hk.sale_transaction_new st 
+  from masterdata_hk.sale_transaction st 
   left join 
     masterdata_hk.property p 
   on 
     p.property_dwid = st.property_dwid 
 where 
     p.project_dwid <> st.project_dwid;
+    -- 1242 --> need further fix
     -- all these counts should be zero
 
 
   select 
     count(*)
-  from masterdata_hk.sale_transaction_new st 
+  from masterdata_hk.sale_transaction st 
   left join 
     masterdata_hk.property p 
   on 
     p.property_dwid = st.property_dwid 
 where 
     p.building_dwid <> st.building_dwid;
-
+    -- 0
    
     
     
   select 
    count(*)
-  from masterdata_hk.sale_transaction_new st 
+  from masterdata_hk.sale_transaction st 
   left join 
     masterdata_hk.property p 
   on 
     p.property_dwid = st.property_dwid 
 where 
     p.address_dwid  <> st.address_dwid;
-    
+    -- 0
     
 
 with x as (        
   select 
     p.address_dwid ,
     st.*
-  from masterdata_hk.sale_transaction_new st 
+  from masterdata_hk.sale_transaction st 
   left join 
     masterdata_hk.property p 
   on 
@@ -152,14 +131,14 @@ select
 from 
     "source".hk_midland_realty_sale_transaction s 
 join x on s.data_uuid::varchar = x.data_uuid;
-
+-- 0
 
 --- Make sure sale transaction and the map are in sync one to one    
     
 select count(*) from 
     map_hk.midland_sale_txn__map m 
 join 
-    masterdata_hk.sale_transaction_new t 
+    masterdata_hk.sale_transaction t 
 on 
     t.activity_dwid = m.activity_dwid 
 where 
@@ -168,13 +147,13 @@ and
     t.property_dwid notnull 
 and 
     m.property_dwid notnull; 
-    
+-- need further fix
     
 select 
     count(*)
     from map_hk.midland_sale_txn__map m 
 join 
-    masterdata_hk.sale_transaction_new t 
+    masterdata_hk.sale_transaction t 
 on 
     t.activity_dwid = m.activity_dwid 
 where 
@@ -183,14 +162,14 @@ and
     t.address_dwid notnull 
 and 
     m.address_dwid notnull; 
-
+-- 0
 
     
 select 
     count(*)
     from map_hk.midland_sale_txn__map m 
 join 
-    masterdata_hk.sale_transaction_new t 
+    masterdata_hk.sale_transaction t 
 on 
     t.activity_dwid = m.activity_dwid 
 where 
@@ -199,7 +178,7 @@ and
     t.building_dwid notnull 
 and 
     m.building_dwid notnull; 
-
+-- 0
     
   
     
@@ -208,7 +187,7 @@ select
     from 
     map_hk.midland_sale_txn__map m 
 join 
-    masterdata_hk.sale_transaction_new t 
+    masterdata_hk.sale_transaction t 
 on 
     t.activity_dwid = m.activity_dwid 
 where 
@@ -217,7 +196,7 @@ and
     t.project_dwid notnull 
 and 
     m.project_dwid notnull; 
-
+-- 0
     
     
 --------------------------------------------------
@@ -233,7 +212,8 @@ and
         and 
             m.project_dwid notnull
         and 
-            m.address_dwid = b.address_dwid 
+            m.address_dwid = b.address_dwid
+            ; -- 0 records
         
         
          select 
@@ -246,7 +226,8 @@ and
             m.project_dwid isnull 
          and 
             m.address_dwid = b.address_dwid              
-        
+        -- 147 records --> need further fix
+
     ----------
     --- find all buildings that have no properties 
     --- orphaned buildings
@@ -257,7 +238,7 @@ and
         masterdata_hk.building b 
     where 
         not exists (select 1 from masterdata_hk.property p where p.building_dwid = b.building_dwid)
-    
+    ; --1829 need further fix
 
 
 
