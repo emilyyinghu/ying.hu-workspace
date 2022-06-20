@@ -157,95 +157,7 @@ from masterdata_hk.dm_address da
 where da.address_type = 'point' --da.address_type = 'locality' and da.address_type_attribute in ('project', 'street', 'building')
 group by 1,2,3
 
-'''
-select 
-	case when development notnull then development 
-		when development isnull and address_building notnull then address_building 
-		end as project_name
-	, array_agg(address_number) as address_number_list
-from masterdata_hk.dm_address da
-where da.address_type = 'point'
-group by 1; -- 13752
 
-with project_address_base as (
-select 
-	case when development notnull then development 
-		when development isnull and address_building notnull then address_building 
-		end as project_name
-	, street_name 
-	, min(address_number) as min_address_number
-	, max(address_number) as max_address_number
-from masterdata_hk.dm_address da
-where da.address_type = 'point'
-group by 1, 2 -- 18581
-)
-select 
-	project_name, street_name, min_address_number, max_address_number,
-	case when min_address_number = max_address_number and min_address_number not ilike '%-%' then min_address_number 
-		else null
-	end as address_number,
-	
-	case when min_address_number = max_address_number and min_address_number not ilike '%-%'  then min_address_number || ' - ' || max_address_number
-		when min_address_number = max_address_number and min_address_number ilike '%-%' then replace(min_address_number, '-', ' - ')
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number not ilike '%-%' then min_address_number || ' - ' || max_address_number
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number ilike '%-%' then
-		
-		
-		
-	end as address_number_range,
-	
-	case when min_address_number = max_address_number and min_address_number not ilike '%-%' then min_address_number
-		when min_address_number = max_address_number and min_address_number ilike '%-%' then split_part(min_address_number, '-', 1) 
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number not ilike '%-%' then min_address_number
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number ilike '%-%' then
-		
-	end as address_number_range_start,
-	
-	case when min_address_number = max_address_number and min_address_number not ilike '%-%' then max_address_number
-		when min_address_number = max_address_number and min_address_number ilike '%-%' then split_part(min_address_number, '-', 1)
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number not ilike '%-%' then max_address_number
-		when min_address_number != max_address_number and min_address_number not ilike '%-%' and max_address_number ilike '%-%' then
-		
-	end as address_number_range_end
-from project_address_base
-where project_name notnull;
-
-
-with project_address_base as (
-select 
-	case when development notnull then development 
-		when development isnull and address_building notnull then address_building 
-		end as project_name
-	, street_name 
-	, min(address_number) as min_address_number
-	, max(address_number) as max_address_number
-from masterdata_hk.dm_address da
-where da.address_type = 'point'
-group by 1, 2 -- 18581
-), project_address_temp as (
-select 
-	*
-	, nullif(split_part(min_address_number, '-', 1), '') as a1
-	, nullif(split_part(min_address_number, '-', 2), '') as a2
-	, nullif(split_part(max_address_number, '-', 1), '') as a3
-	, nullif(split_part(max_address_number, '-', 2), '') as a4
-from project_address_base
-where project_name in ('CARNARVON MANSION', 'KAM SING BUILDING', 'COSMOPOLITAN ESTATE', 'CENTENARY MANSION')
-and min_address_number != max_address_number and (min_address_number ilike '%-%' or max_address_number ilike '%-%')
---group by 1,2,3,4
-order by 1,2
-)
-select 
-	project_name, street_name, min_address_number, max_address_number, a1,a2,a3,a4
-	,case when a1<=a2 and a1<=a3 and a1<=a4 then a1 end as address_number_range_start
-	--address_number_range_end
-from project_address_temp
-
-
-
-select '8'<'10'
-
-'''
 
 --insert into masterdata_hk.dm_address
 -- 'lower() as '
@@ -344,24 +256,6 @@ and da.dw_address_id not in (select dw_address_id from masterdata_hk.address)
 
 call api.update_table_sql('hk', 'masterdata_hk', 'address');
 
-'''
-UPDATE masterdata_hk.address 
-SET slug = (country_code||'/'||'hk'||'/'||city_code||''||city_area_code||''||city_subarea_code||'/'
-||development||'/'||development_phase||'/'||address_building||'/'||address_street_text) 
-WHERE slug isnull ;
- 
-
-UPDATE masterdata_hk.address 
-SET slug = (country_code||'/'||'hk'||'/'||city_code||''||
-coalesce(city_area_code,'')||''||coalesce(city_subarea_code,'')||'/'||
-coalesce(development,'')||'/'||coalesce(development_phase,'')||'/'||coalesce(address_building,'')||'/'||
-coalesce(address_street_text,'')) 
-WHERE slug isnull ;
-'''
-
--- cn/hk/nttptp////173-ka-king-lane
-
--- cn/hk/nttptp////173 ka king lane
 
 select api.get_normalized_name('cn/hk/nttptp////173 ka king lane')
 
