@@ -655,28 +655,6 @@ select *
 from masterdata_hk.building 
 where original_slug  ilike 'hk/%'
 
--- delete from masterdata_hk.building where original_slug ilike 'hk/%';
-
-
--- too slow
--- DELETE FROM masterdata_hk.project WHERE id = 3059512;
--- DELETE FROM masterdata_hk.address WHERE id = 645735838;
--- DELETE FROM masterdata_hk.address WHERE id >= 645735794 and id <= 645735814;
-
-('645735794', '645735795', '645735796', '645735797', '645735798', '645735799', '645735800', '645735801', '645735802', '645735803', '645735804', '', '', '')
-
-645735805
-645735806
-645735807
-645735808
-645735809
-645735810
-645735811
-645735812
-645735813
-645735814
-645735838
-
 
 select *
 from masterdata_hk.address WHERE id >= 645735794 and id <= 645735814;
