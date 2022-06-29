@@ -16,26 +16,6 @@ SELECT pg_cancel_backend(4004);
 SELECT pg_terminate_backend(4004);
 
 
---- to do (database too slow) --> all done!
-alter table map_hk.midland_sale_txn__map drop constraint midland_sale_txn__map_fk_activity_dwid;
-
-drop table masterdata_hk.sale_transaction cascade;
-
-
-ALTER TABLE masterdata_hk.sale_transaction_new RENAME TO sale_transaction;
-
-
-DROP TABLE masterdata_hk.property_v1 cascade;
-
-
-DELETE FROM masterdata_hk.project WHERE id = 3059512;
-DELETE FROM masterdata_hk.address WHERE id = 645735838;
-
-
-DELETE FROM masterdata_hk.address WHERE id >= 645735794 and id <= 645735814;
-
-
-
 --- consistency check scripts
 
 -- percentage of activity that we have mapped
