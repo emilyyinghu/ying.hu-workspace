@@ -87,7 +87,6 @@ join m on st2.building_dwid = m.building_dwid;
 where 
     p.project_dwid <> st.project_dwid;
     -- 1242 -- 0
-	'''need further fix'''
     -- all these counts should be zero
 
 
@@ -152,7 +151,6 @@ and
 and 
     m.property_dwid notnull; 
 -- 207004 -- 0
-'''need further fix'''
 -- all these counts should be zero
    
    
@@ -234,7 +232,6 @@ and
 and 
     m.address_dwid = b.address_dwid              
 -- 147 records -- 0
-'''need further fix'''
 
     
     
@@ -250,7 +247,6 @@ from
 where 
     not exists (select 1 from masterdata_hk.property p where p.building_dwid = b.building_dwid)
 ; --1829 -- 1792	
-'''need further fix'''
 
 
 
@@ -268,7 +264,6 @@ where
     p.project_dwid <> st.project_dwid
 ;
     -- 1242  -- 0 
-	'''need further fix'''
     -- all these counts should be zero
 
 
